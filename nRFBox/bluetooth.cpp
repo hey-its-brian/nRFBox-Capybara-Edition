@@ -122,14 +122,19 @@ namespace BleJammer {
     esp_wifi_deinit();
     esp_wifi_disconnect();
 
-    pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(BUTTON_UP_PIN), handleButtonPress, FALLING);
-
+    // Input is the shared encoder + button (rdBtn), not a raw pin interrupt:
+    // the old button GPIOs are now virtual, so attachInterrupt() on them is dead.
     initializeRadios();
     updateOLED();
   }
 
   void blejammerLoop() {
+    // Encoder press cycles the mode (Deactive -> BLE -> Bluetooth).
+    static unsigned long lastBtn = 0;
+    if (rdBtn(BTN_PIN_RIGHT) == LOW && millis() - lastBtn > 400) {
+      lastBtn = millis();
+      modeChangeRequested = true;
+    }
     checkModeChange();
 
     if (currentMode == BLE_MODULE) {
@@ -173,10 +178,6 @@ void blescanSetup() {
   scan = BLEDevice::getScan();
   scan->setActiveScan(true);
   
-  pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP);
-  pinMode(BTN_PIN_RIGHT, INPUT_PULLUP);
-  pinMode(BTN_PIN_LEFT, INPUT_PULLUP);
 
   
   for (int cycle = 0; cycle < 3; cycle++) { 
@@ -215,7 +216,7 @@ void blescanLoop() {
   }
 
   if (currentMillis - lastDebounce > debounce_Delay) {
-    if (digitalRead(BUTTON_UP_PIN) == LOW) {
+    if (rdBtn(BUTTON_UP_PIN) == LOW) {
       if (selectedIndex > 0) {
         selectedIndex--;
         if (selectedIndex < displayStartIndex) {
@@ -223,7 +224,7 @@ void blescanLoop() {
         }
       }
       lastDebounce = currentMillis;
-    } else if (digitalRead(BUTTON_DOWN_PIN) == LOW) {
+    } else if (rdBtn(BUTTON_DOWN_PIN) == LOW) {
       if (selectedIndex < results.getCount() - 1) {
         selectedIndex++;
         if (selectedIndex >= displayStartIndex + 5) {
@@ -231,7 +232,7 @@ void blescanLoop() {
         }
       }
       lastDebounce = currentMillis;
-    } else if (digitalRead(BTN_PIN_RIGHT) == LOW) {
+    } else if (rdBtn(BTN_PIN_RIGHT) == LOW) {
       showDetails = true;
       lastDebounce = currentMillis;
     }
@@ -276,7 +277,7 @@ void blescanLoop() {
     u8g2.drawStr(0, 50, "Press LEFT to go back");
     u8g2.sendBuffer();
 
-    if (digitalRead(BTN_PIN_LEFT) == LOW) {
+    if (rdBtn(BTN_PIN_LEFT) == LOW) {
       showDetails = false;
       lastDebounce = currentMillis;
       }
@@ -684,7 +685,7 @@ namespace Spoofer {
   }
 
   void handleButtonPress(int pin, unsigned long &lastDebounceTime, void (*callback)()) {
-    if (digitalRead(pin) == LOW) {
+    if (rdBtn(pin) == LOW) {
       unsigned long currentTime = millis();
       if ((currentTime - lastDebounceTime) > debounceDelay) {
         Serial.println("Button press: Pin=" + String(pin));
@@ -698,10 +699,6 @@ namespace Spoofer {
     Serial.begin(115200);
     
     randomSeed(analogRead(0));
-    pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
-    pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP);
-    pinMode(BTN_PIN_RIGHT, INPUT_PULLUP);
-    pinMode(BTN_PIN_LEFT, INPUT_PULLUP);
 
     BLEDevice::init("nRF-BOX");
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9); // +9dBm

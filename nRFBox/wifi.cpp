@@ -25,10 +25,6 @@ void wifiscanSetup() {
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   
-  pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP);
-  pinMode(BTN_PIN_RIGHT, INPUT_PULLUP);
-  pinMode(BTN_PIN_LEFT, INPUT_PULLUP);
   
   for (int cycle = 0; cycle < 3; cycle++) { 
     for (int i = 0; i < 3; i++) {
@@ -65,7 +61,7 @@ void wifiscanLoop() {
   }
 
   if (currentMillis - lastButtonPress > debounceTime) {
-    if (digitalRead(BUTTON_UP_PIN) == LOW) {
+    if (rdBtn(BUTTON_UP_PIN) == LOW) {
       if (currentIndex > 0) {
         currentIndex--;
         if (currentIndex < listStartIndex) {
@@ -73,7 +69,7 @@ void wifiscanLoop() {
         }
       }
       lastButtonPress = currentMillis;
-    } else if (digitalRead(BUTTON_DOWN_PIN) == LOW) {
+    } else if (rdBtn(BUTTON_DOWN_PIN) == LOW) {
       if (currentIndex < WiFi.scanComplete() - 1) {
         currentIndex++;
         if (currentIndex >= listStartIndex + 5) {
@@ -81,7 +77,7 @@ void wifiscanLoop() {
         }
       }
       lastButtonPress = currentMillis;
-    } else if (digitalRead(BTN_PIN_RIGHT) == LOW) {
+    } else if (rdBtn(BTN_PIN_RIGHT) == LOW) {
       isDetailView = true;
       lastButtonPress = currentMillis;
     }
@@ -136,7 +132,7 @@ void wifiscanLoop() {
     u8g2.drawStr(0, 60, "Press LEFT to go back");
     u8g2.sendBuffer();
 
-    if (digitalRead(BTN_PIN_LEFT) == LOW) {
+    if (rdBtn(BTN_PIN_LEFT) == LOW) {
       isDetailView = false;
       lastButtonPress = currentMillis;
       }
@@ -411,12 +407,12 @@ void drawAttackScreen(bool fullRedraw = true) {
 void handleButtons() {
     unsigned long currentMillis = millis();
 
-    if (digitalRead(BTN_PIN_RIGHT) == LOW && currentMillis - lastRightButtonPress >= rightDebounceTime && !scanning) {
+    if (rdBtn(BTN_PIN_RIGHT) == LOW && currentMillis - lastRightButtonPress >= rightDebounceTime && !scanning) {
         unsigned long start = micros(); 
         lastRightButtonPress = currentMillis;
 
         delayMicroseconds(400);
-        if (digitalRead(BTN_PIN_RIGHT) != LOW) return;
+        if (rdBtn(BTN_PIN_RIGHT) != LOW) return;
 
         if (!isDetailView && network_count > 0) {
             isDetailView = true;
@@ -435,13 +431,13 @@ void handleButtons() {
             Serial.print("Right pressed, attack: "); Serial.println(attack_running ? "Running" : "Stopped");
             drawAttackScreen(false); 
         }
-        while (digitalRead(BTN_PIN_RIGHT) == LOW); 
+        while (rdBtn(BTN_PIN_RIGHT) == LOW); 
         Serial.print("Toggle latency: "); Serial.println(micros() - start); 
     }
 
     if (currentMillis - lastButtonPress < debounceTime || scanning) return;
 
-    if (digitalRead(BUTTON_UP_PIN) == LOW) {
+    if (rdBtn(BUTTON_UP_PIN) == LOW) {
         if (!isDetailView && currentIndex > 0) {
             currentIndex--;
             if (currentIndex < listStartIndex) {
@@ -450,8 +446,8 @@ void handleButtons() {
             drawScanScreen();
         }
         lastButtonPress = currentMillis;
-        while (digitalRead(BUTTON_UP_PIN) == LOW); 
-    } else if (digitalRead(BUTTON_DOWN_PIN) == LOW) {
+        while (rdBtn(BUTTON_UP_PIN) == LOW); 
+    } else if (rdBtn(BUTTON_DOWN_PIN) == LOW) {
         if (!isDetailView && currentIndex < network_count - 1) {
             currentIndex++;
             if (currentIndex >= listStartIndex + networks_per_page) {
@@ -460,8 +456,8 @@ void handleButtons() {
             drawScanScreen();
         }
         lastButtonPress = currentMillis;
-        while (digitalRead(BUTTON_DOWN_PIN) == LOW); 
-    } else if (digitalRead(BTN_PIN_LEFT) == LOW) {
+        while (rdBtn(BUTTON_DOWN_PIN) == LOW); 
+    } else if (rdBtn(BTN_PIN_LEFT) == LOW) {
         if (isDetailView) { 
             attack_running = false;
             last_packet_time = 0;
@@ -470,7 +466,7 @@ void handleButtons() {
             drawScanScreen();
         }
         lastButtonPress = currentMillis;
-        while (digitalRead(BTN_PIN_LEFT) == LOW); 
+        while (rdBtn(BTN_PIN_LEFT) == LOW); 
     }
 }
 
@@ -478,10 +474,6 @@ void deautherSetup() {
     Serial.begin(115200);
     u8g2.begin();
 
-    pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
-    pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP);
-    pinMode(BTN_PIN_RIGHT, INPUT_PULLUP);
-    pinMode(BTN_PIN_LEFT, INPUT_PULLUP);
 
     setNeoPixelColour("0");
     lastNeoPixelColour = "0";

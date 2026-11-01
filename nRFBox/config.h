@@ -9,15 +9,34 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
-// Push Buttons-specific Pins
-#define BUTTON_UP_PIN       26 
-#define BUTTON_SELECT_PIN   33
-#define BUTTON_DOWN_PIN     32 
-#define BTN_PIN_RIGHT       27
-#define BTN_PIN_LEFT        25
+// Input: rotary encoder (with push switch) + ONE button (replaces the 5 buttons).
+// The EC11's push switch (terminals D/E) is wired to ENC_SW_PIN and GND.
+// Physical pins (reuse the GPIOs the old buttons freed up):
+#define ENC_A_PIN    25   // rotary encoder channel A
+#define ENC_B_PIN    26   // rotary encoder channel B
+#define ENC_SW_PIN   27   // encoder push switch (EC11 D/E) -> SELECT
+#define BTN_BACK_PIN 32   // single button: tap = back (LEFT), hold = RIGHT
+// GPIO 33 is still free; the SD card uses SD_CS_PIN (13) on the shared SPI bus.
+
+// Logical (virtual) button IDs. The firmware still asks for these five, but they are
+// now synthesized from the encoder + button by rdBtn(), not read from real GPIOs:
+//   rotate CCW -> UP     rotate CW -> DOWN
+//   encoder short press -> SELECT (enter) in the menu / RIGHT (activate) in an app
+//   encoder long press  -> exit the app     button tap -> LEFT     button hold -> RIGHT
+// Values are sentinels (>GPIO range) so a stray read can't hit a real pin.
+#define BUTTON_UP_PIN       201
+#define BUTTON_DOWN_PIN     202
+#define BUTTON_SELECT_PIN   203
+#define BTN_PIN_LEFT        204
+#define BTN_PIN_RIGHT       205
+
+// Input shim (defined in nRFBox.ino): rdBtn() returns LOW when the given logical
+// button is active and HIGH otherwise, matching the old active-low digitalRead().
+int  rdBtn(int id);
+void inputSetup();
 
 // SD Card Slot-specific Pins
-#define SD_CS_PIN 5
+#define SD_CS_PIN 13
 #define FIRMWARE_FILE "/firmware.bin"
 
 // nRF24-specific Pins

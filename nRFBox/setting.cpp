@@ -202,7 +202,7 @@ void toggleOption(int option) {
 }
 
 void handleButtons() {
-  if (!digitalRead(BUTTON_UP_PIN)) {
+  if (!rdBtn(BUTTON_UP_PIN)) {
     if (!buttonUpPressed) {
       buttonUpPressed = true;
       currentOption = (currentOption - 1 + totalOptions) % totalOptions;
@@ -211,7 +211,7 @@ void handleButtons() {
     buttonUpPressed = false;
   }
 
-  if (!digitalRead(BUTTON_DOWN_PIN)) {
+  if (!rdBtn(BUTTON_DOWN_PIN)) {
     if (!buttonDownPressed) {
       buttonDownPressed = true;
       currentOption = (currentOption + 1) % totalOptions;
@@ -220,7 +220,7 @@ void handleButtons() {
     buttonDownPressed = false;
   }
 
-  if (!digitalRead(BTN_PIN_RIGHT)) {
+  if (!rdBtn(BTN_PIN_RIGHT)) {
     if (!buttonSelectPressed) {
       buttonSelectPressed = true;
       toggleOption(currentOption);
@@ -277,9 +277,6 @@ void settingSetup() {
   if (oledBrightness > 255) oledBrightness = 128; 
   u8g2.setContrast(oledBrightness);
 
-  pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP);
-  pinMode(BTN_PIN_RIGHT, INPUT_PULLUP);
 }
 
 void settingLoop() {

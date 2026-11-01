@@ -145,7 +145,7 @@ namespace Analyzer {
 
     ScanChannels();
 
-    if (digitalRead(BUTTON_SELECT_PIN) == LOW) {
+    if (rdBtn(BUTTON_SELECT_PIN) == LOW) {
       unsigned long currentMillis = millis();
       if ((currentMillis - lastDebounceTimeSelect) > debounceDelay) {
         Serial.println("Select button pressed, exiting Analyzer");
@@ -158,7 +158,7 @@ namespace Analyzer {
 
     int n = 200;
     while (n--) {
-      if (digitalRead(BUTTON_SELECT_PIN) == LOW) {
+      if (rdBtn(BUTTON_SELECT_PIN) == LOW) {
         unsigned long currentMillis = millis();
         if ((currentMillis - lastDebounceTimeSelect) > debounceDelay) {
           Serial.println("Select button pressed, exiting Analyzer");
@@ -168,7 +168,7 @@ namespace Analyzer {
       }
       int i = N;
       while (i--) {
-        if (digitalRead(BUTTON_SELECT_PIN) == LOW) {
+        if (rdBtn(BUTTON_SELECT_PIN) == LOW) {
           unsigned long currentMillis = millis();
           if ((currentMillis - lastDebounceTimeSelect) > debounceDelay) {
             Serial.println("Select button pressed, exiting Analyzer");
@@ -186,7 +186,7 @@ namespace Analyzer {
       }
     }
     
-    if (digitalRead(BUTTON_SELECT_PIN) == LOW && (millis() - lastDebounceTimeSelect) > debounceDelay) {
+    if (rdBtn(BUTTON_SELECT_PIN) == LOW && (millis() - lastDebounceTimeSelect) > debounceDelay) {
       return;
     }
 
@@ -376,18 +376,21 @@ namespace ProtoKill {
     esp_wifi_deinit();
     esp_wifi_disconnect();
 
-    pinMode(BTN_PIN_LEFT, INPUT_PULLUP);
-    pinMode(BTN_PIN_RIGHT, INPUT_PULLUP);
-    pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(BTN_PIN_LEFT), handleButton, FALLING);
-    attachInterrupt(digitalPinToInterrupt(BTN_PIN_RIGHT), handleButton1, FALLING);
-    attachInterrupt(digitalPinToInterrupt(BUTTON_UP_PIN), handleButton2, FALLING);
-
+    // Input is the shared encoder + button (rdBtn), polled in blackoutLoop():
+    // the old button GPIOs are now virtual, so attachInterrupt() on them is dead.
     initialize_Radios();
     update_OLED();
   }
 
   void blackoutLoop() {
+    // Rotate = change mode (prev/next); encoder press = toggle Active/Deactive.
+    if (rdBtn(BUTTON_UP_PIN) == LOW)   ChangeRequested  = true;  // prev mode
+    if (rdBtn(BUTTON_DOWN_PIN) == LOW) ChangeRequested1 = true;  // next mode
+    static unsigned long lastTog = 0;
+    if (rdBtn(BTN_PIN_RIGHT) == LOW && millis() - lastTog > 400) {
+      lastTog = millis();
+      current = (current == DEACTIVE_MODE) ? ACTIVE_MODE : DEACTIVE_MODE;
+    }
     checkMode();
 
     static Operation lastMode = DEACTIVE_MODE;
@@ -524,7 +527,7 @@ namespace Scanner {
         static unsigned long lastDebounceTimeSelect = 0;
         const unsigned long debounceDelay = 200;
         
-        if (digitalRead(BUTTON_SELECT_PIN) == LOW) {
+        if (rdBtn(BUTTON_SELECT_PIN) == LOW) {
           unsigned long currentMillis = millis();
           if ((currentMillis - lastDebounceTimeSelect) > debounceDelay) {
             Serial.println("Select button pressed, exiting scanChannels");
@@ -637,7 +640,7 @@ namespace Scanner {
     const unsigned long debounceDelay = 200; // Match Jammer/Analyzer
 
     // Check Select button before scanning
-    if (digitalRead(BUTTON_SELECT_PIN) == LOW) {
+    if (rdBtn(BUTTON_SELECT_PIN) == LOW) {
       unsigned long currentMillis = millis();
       if ((currentMillis - lastDebounceTimeSelect) > debounceDelay) {
         Serial.println("Select button pressed, exiting Scanner");
@@ -649,7 +652,7 @@ namespace Scanner {
     scanChannels();
 
     // Check Select button after scanning
-    if (digitalRead(BUTTON_SELECT_PIN) == LOW) {
+    if (rdBtn(BUTTON_SELECT_PIN) == LOW) {
       unsigned long currentMillis = millis();
       if ((currentMillis - lastDebounceTimeSelect) > debounceDelay) {
         Serial.println("Select button pressed, exiting Scanner");
@@ -661,7 +664,7 @@ namespace Scanner {
     outputChannels();
 
     // Skip EEPROM save if Select was pressed
-    if (digitalRead(BUTTON_SELECT_PIN) == LOW && (millis() - lastDebounceTimeSelect) > debounceDelay) {
+    if (rdBtn(BUTTON_SELECT_PIN) == LOW && (millis() - lastDebounceTimeSelect) > debounceDelay) {
       return;
     }
 
@@ -813,7 +816,7 @@ namespace Jammer {
   }
 
   void handleButtonPress(int pin, unsigned long &lastDebounceTime, void (*callback)()) {
-    int reading = digitalRead(pin);
+    int reading = rdBtn(pin);
     if (reading == LOW) {
       unsigned long currentTime = millis();
       if ((currentTime - lastDebounceTime) > debounceDelay) {
@@ -946,10 +949,6 @@ namespace Jammer {
     esp_wifi_stop();
     esp_wifi_deinit();
 
-    pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
-    pinMode(BTN_PIN_RIGHT, INPUT_PULLUP);
-    pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP);
-    pinMode(BTN_PIN_LEFT, INPUT_PULLUP);
 
     SPI.begin();
 
