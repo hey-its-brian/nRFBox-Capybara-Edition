@@ -50,6 +50,27 @@ This is a fork of [cifertech/nRFBox](https://github.com/cifertech/nrfbox) with a
 
 Internal pull-ups are enabled, so wire the encoder common and the button's other leg to GND. GPIO33 (an old button pin) is now spare. The nRF24 radios, OLED (I2C on 21/22), NeoPixel (14), and SD (CS 13) are unchanged.
 
+### Bill of materials
+
+| Qty | Part | Notes |
+|-----|------|-------|
+| 1 | ESP32 DevKit (30-pin DOIT v1, WROOM-32, micro-USB) | Main board; ~51.5 mm long, socketed on the carrier |
+| 3 | Ebyte E01 2.4 GHz module (nRF24L01+ compatible) | The three radios; run off a dedicated 3.3V rail |
+| 3 | 2.4 GHz antenna | One per E01 (case-mounted) |
+| 1 | 0.96" OLED, SSD1306, I2C, 128x64 | Address 0x3C on SDA=21 / SCL=22 |
+| 1 | EC11 rotary encoder with push switch | Primary control (encoder A=25, B=26, SW=27) |
+| 1 | Momentary tactile button | Back button (GPIO32) |
+| 1 | WS2812 NeoPixel (single) | Status LED on GPIO14 |
+| 1 | Buck converter, 5V to 3.3V, about 11.75 x 17.5 mm | Clean 3.3V supply for the three radios |
+| 1 | LiPo charge + boost module (USB-C, ETA PMIC, about 26.3 mm) | Charges the battery and boosts to a 5V rail |
+| 1 | LiPo battery | Portable power |
+| 1 | Slide / toggle power switch | In the battery ground line |
+| 1 | microSD card module (optional) | For the SD firmware-update feature, CS on GPIO13 |
+| - | Hookup wire, pin headers, common GND | |
+
+> [!IMPORTANT]
+> The Ebyte E01 modules (especially PA/LNA variants) draw current bursts that can brown out a shared 3.3V supply. Power them from the dedicated buck 3.3V rail (not the DevKit's regulator) with local decoupling, or you will see resets and dropped radios.
+
 ### How it works
 
 Every app still reads the original five logical buttons, but they are now synthesized from the encoder and button by a small shim (`rdBtn()` in `nRFBox.ino`): the `BUTTON_*` / `BTN_PIN_*` macros became sentinel IDs rather than real GPIOs. The encoder rotation and switch are read via interrupts so quick presses are never missed, and a tap is delivered to apps as a brief press-and-hold so screens that re-check the held state (for example WiFi scan-start) still work. Proto Kill and BLE Jammer, which previously used raw pin interrupts, are driven through the same shim.
