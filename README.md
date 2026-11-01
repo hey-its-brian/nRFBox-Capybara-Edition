@@ -48,7 +48,7 @@ This is a fork of [cifertech/nRFBox](https://github.com/cifertech/nrfbox) with a
 | Encoder switch (EC11 D/E terminals) | 27 |
 | Button | 32 |
 
-Internal pull-ups are enabled, so wire the encoder common and the button's other leg to GND. GPIO33 (an old button pin) is now spare. The nRF24 radios, OLED (I2C on 21/22), NeoPixel (14), and SD (CS 13) are unchanged.
+Internal pull-ups are enabled, so wire the encoder common and the button's other leg to GND. Radio C's CSN moved to GPIO13 (a clean pin, clear of the encoder), so GPIO2 and GPIO33 are now spare. The other nRF24 lines, OLED (I2C on 21/22), and NeoPixel (14) are unchanged. SD support is parked.
 
 ### Bill of materials
 
@@ -65,7 +65,7 @@ Internal pull-ups are enabled, so wire the encoder common and the button's other
 | 1 | LiPo charge + boost module (USB-C, ETA PMIC, about 26.3 mm) | Charges the battery and boosts to a 5V rail |
 | 1 | LiPo battery | Portable power |
 | 1 | Slide / toggle power switch | In the battery ground line |
-| 1 | microSD card module (optional) | For the SD firmware-update feature, CS on GPIO13 |
+| 1 | microSD card module (optional) | SD firmware-update feature, parked (GPIO13 is now Radio C's CSN) |
 | - | Hookup wire, pin headers, common GND | |
 
 > [!IMPORTANT]
@@ -77,7 +77,7 @@ Every app still reads the original five logical buttons, but they are now synthe
 
 ### Build note
 
-Unchanged from upstream: build on esp32 Arduino core 2.0.17 with `-Wl,-zmuldefs` and the `min_spiffs` partition scheme. Disconnect GPIO2 to enter download mode when flashing.
+Unchanged from upstream: build on esp32 Arduino core 2.0.17 with `-Wl,-zmuldefs` and the `min_spiffs` partition scheme. (Radio C's CSN is no longer on GPIO2, so no flash-time disconnect is needed.)
 
 ### Hardware
 

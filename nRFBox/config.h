@@ -16,7 +16,7 @@
 #define ENC_B_PIN    26   // rotary encoder channel B
 #define ENC_SW_PIN   27   // encoder push switch (EC11 D/E) -> SELECT
 #define BTN_BACK_PIN 32   // single button: tap = back (LEFT), hold = RIGHT
-// GPIO 33 is still free; the SD card uses SD_CS_PIN (13) on the shared SPI bus.
+// Radio C's CSN is on GPIO13 (clear of the encoder cluster); GPIO33 is free. SD is parked (SD_CS placeholder on GPIO2).
 
 // Logical (virtual) button IDs. The firmware still asks for these five, but they are
 // now synthesized from the encoder + button by rdBtn(), not read from real GPIOs:
@@ -36,7 +36,7 @@ int  rdBtn(int id);
 void inputSetup();
 
 // SD Card Slot-specific Pins
-#define SD_CS_PIN 13
+#define SD_CS_PIN 2    // SD is parked and unwired; moved off 13 (now Radio C CSN). GPIO2 is just a placeholder here until SD is revived.
 #define FIRMWARE_FILE "/firmware.bin"
 
 // nRF24-specific Pins
@@ -44,8 +44,8 @@ void inputSetup();
 #define NRF_CSN_PIN_A   17 
 #define NRF_CE_PIN_B    16  
 #define NRF_CSN_PIN_B   4  
-#define NRF_CE_PIN_C    15  
-#define NRF_CSN_PIN_C   2  
+#define NRF_CE_PIN_C    15
+#define NRF_CSN_PIN_C   13   // moved off GPIO2 (LED-loaded strapping pin) and GPIO33 (sits next to the encoder); 13 is clear of the encoder cluster
 
 // Common dependencies
 #include "setting.h"
