@@ -83,11 +83,12 @@ Unchanged from upstream: build on esp32 Arduino core 2.0.17 with `-Wl,-zmuldefs`
 
 **3D-printed case.** A printable enclosure is in [`3d_print/nrf.stl`](3d_print/nrf.stl).
 
-**E07 + E01 breakout PCB.** A shared-bus breakout that carries an E07-433M20S (CC1101, 433 MHz sub-GHz) and an E01-2G4M27SX (nRF24L01+, 2.4 GHz) side by side, with IPEX antenna pads. Gerbers, KiCad source, and a render are in [`PCB/ebyte_e01_board/`](PCB/ebyte_e01_board/).
+**nRFBox Carrier v1.0.** A single carrier board that ties the whole build together: three E01-2G4M27SX (nRF24L01+, 2.4 GHz) radios with IPEX antenna pads, a socketed ESP32 DevKit, a MINI-360 buck for the dedicated 3.3V radio rail, a USB-C charge + 5V boost module, the rotary encoder and button, an OLED header, and 5V-in plus split-ground switch pads. Gerbers and top/bottom renders are in [`PCB/nrfbox_carrier/`](PCB/nrfbox_carrier/); design notes and a self-contained build brief are in [`hardware/carrier/`](hardware/carrier/).
 
-![E07 + E01 breakout](PCB/ebyte_e01_board/e07_e01_breakout_render.png)
-
-**Carrier PCB (in progress).** A full carrier (socketed DevKit, three surface-mount radios, buck plus charge/boost power, encoder and button) is being designed. Design notes and a self-contained build brief are in [`hardware/carrier/`](hardware/carrier/).
+<div align="center">
+  <img src="PCB/nrfbox_carrier/nrfbox_carrier_top.png" alt="nRFBox Carrier top" width="45%"/>
+  <img src="PCB/nrfbox_carrier/nrfbox_carrier_bottom.png" alt="nRFBox Carrier bottom" width="45%"/>
+</div>
 
 <div>&nbsp;</div>
 
