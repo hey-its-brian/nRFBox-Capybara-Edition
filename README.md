@@ -79,9 +79,15 @@ Every app still reads the original five logical buttons, but they are now synthe
 
 Unchanged from upstream: build on esp32 Arduino core 2.0.17 with `-Wl,-zmuldefs` and the `min_spiffs` partition scheme. Disconnect GPIO2 to enter download mode when flashing.
 
-### Hardware (work in progress)
+### Hardware
 
-A custom carrier PCB (socketed DevKit, three surface-mount radios, buck plus charge/boost power, encoder and button) is being designed. Design notes and a self-contained build brief are in [`hardware/carrier/`](hardware/carrier/).
+**3D-printed case.** A printable enclosure is in [`3d_print/nrf.stl`](3d_print/nrf.stl).
+
+**E07 + E01 breakout PCB.** A shared-bus breakout that carries an E07-433M20S (CC1101, 433 MHz sub-GHz) and an E01-2G4M27SX (nRF24L01+, 2.4 GHz) side by side, with IPEX antenna pads. Gerbers, KiCad source, and a render are in [`PCB/ebyte_e01_board/`](PCB/ebyte_e01_board/).
+
+![E07 + E01 breakout](PCB/ebyte_e01_board/e07_e01_breakout_render.png)
+
+**Carrier PCB (in progress).** A full carrier (socketed DevKit, three surface-mount radios, buck plus charge/boost power, encoder and button) is being designed. Design notes and a self-contained build brief are in [`hardware/carrier/`](hardware/carrier/).
 
 <div>&nbsp;</div>
 
