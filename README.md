@@ -25,6 +25,45 @@
 
 </div>
 
+## 🦫 Capybara Edition
+
+This is a fork of [cifertech/nRFBox](https://github.com/cifertech/nrfbox) with a reworked physical interface: the five push buttons are replaced by **one rotary encoder (with push switch) plus one button**.
+
+### Controls
+
+| Input | Action |
+|-------|--------|
+| Rotate encoder | Navigate / move between items |
+| Press encoder (short) | Select / activate (enter an app, confirm an item) |
+| Press encoder (long, about 0.5s) | Exit the current app |
+| Button (tap) | Back (steps back a level; exits the app at the top level) |
+| Button (hold) | Right / value-up, where an app uses it |
+
+### Wiring
+
+| Signal | ESP32 GPIO |
+|--------|-----------|
+| Encoder A | 25 |
+| Encoder B | 26 |
+| Encoder switch (EC11 D/E terminals) | 27 |
+| Button | 32 |
+
+Internal pull-ups are enabled, so wire the encoder common and the button's other leg to GND. GPIO33 (an old button pin) is now spare. The nRF24 radios, OLED (I2C on 21/22), NeoPixel (14), and SD (CS 13) are unchanged.
+
+### How it works
+
+Every app still reads the original five logical buttons, but they are now synthesized from the encoder and button by a small shim (`rdBtn()` in `nRFBox.ino`): the `BUTTON_*` / `BTN_PIN_*` macros became sentinel IDs rather than real GPIOs. The encoder rotation and switch are read via interrupts so quick presses are never missed, and a tap is delivered to apps as a brief press-and-hold so screens that re-check the held state (for example WiFi scan-start) still work. Proto Kill and BLE Jammer, which previously used raw pin interrupts, are driven through the same shim.
+
+### Build note
+
+Unchanged from upstream: build on esp32 Arduino core 2.0.17 with `-Wl,-zmuldefs` and the `min_spiffs` partition scheme. Disconnect GPIO2 to enter download mode when flashing.
+
+### Hardware (work in progress)
+
+A custom carrier PCB (socketed DevKit, three surface-mount radios, buck plus charge/boost power, encoder and button) is being designed. Design notes and a self-contained build brief are in [`hardware/carrier/`](hardware/carrier/).
+
+<div>&nbsp;</div>
+
 ## 📖 Explore the nRFBox Wiki
 
 Complete project story, in-depth tutorials, and all the features in [Wiki](https://github.com/cifertech/nRFBox/wiki)! From Wi-Fi deauthentication attacks to Sub-GHz signal replay, the Wiki covers everything you need to get started. [Click here to explore now!](https://github.com/cifertech/nRFBox/wiki)
